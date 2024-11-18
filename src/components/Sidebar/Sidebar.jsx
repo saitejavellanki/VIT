@@ -21,7 +21,8 @@ const Sidebar = () => {
 		>
 			<Flex direction={"column"} gap={10} w='full' height={"full"}>
 				<Link to={"/"} as={RouterLink} pl={2} display={{ base: "none", md: "block" }} cursor='pointer'>
-					<InstagramLogo />
+				<h1 style={{ fontSize: '36px', fontWeight: 'bold', fontStyle: 'italic' }}>Vitology.</h1>
+
 				</Link>
 				<Link
 					to={"/"}
@@ -35,7 +36,7 @@ const Sidebar = () => {
 					w={10}
 					cursor='pointer'
 				>
-					<InstagramMobileLogo />
+					<h1 style={{ fontSize: '36px', fontWeight: 'bold' }}>o</h1>
 				</Link>
 				<Flex direction={"column"} gap={5} cursor={"pointer"}>
 					<SidebarItems />
