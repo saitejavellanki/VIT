@@ -8,12 +8,12 @@ import Chatting from "./Chatting";
 const SidebarItems = () => {
   return (
     <>
-      <Home />
+      {/* <Home />
       <Search />
       <Notifications />
-      <CreatePost />
+      <CreatePost /> */}
       <Chatting />
-      <ProfileLink />
+      {/* <ProfileLink /> */}
     </>
   );
 };
