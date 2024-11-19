@@ -170,7 +170,7 @@ const GenderSymbol = ({ gender }) => {
   const symbolData = symbols[gender] || symbols["prefer-not-to-say"];
 
   return (
-    <Text
+    <Text//
       fontSize="xl"
       fontWeight="bold"
       color={symbolData.color}
