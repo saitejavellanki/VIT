@@ -396,63 +396,107 @@ const PostCard = ({ post }) => {
     </Box>
   );
 
-  const SearchAndTags = () => (
-    <Box mb={{ base: 4, md: 8 }}>
-      <InputGroup mb={{ base: 4, md: 6 }}>
-        <InputLeftElement pointerEvents="none">
-          <FiSearch color="gray.300" />
-        </InputLeftElement>
-        <Input
-          placeholder="Search posts by content or tags..."
-          bg="gray.900"
-          border="1px solid"
-          borderColor="gray.700"
-          color="white"
-          _placeholder={{ color: 'gray.400' }}
-          value={searchQuery}
-          onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setSelectedTag('');
-          }}
-          size={{ base: "md", md: "lg" }}
-        />
-      </InputGroup>
-
-      {popularTags.length > 0 && (
-        <Box>
-          <Heading size={{ base: "xs", md: "sm" }} color="gray.300" mb={3}>
-            Popular Tags
-          </Heading>
-          <Wrap spacing={{ base: 1, md: 2 }}>
-            {popularTags.map(({ tag, likes }) => (
-              <WrapItem key={tag}>
-                <Tag
-                  size={{ base: "sm", md: "md" }}
-                  bg={selectedTag === tag ? 'blue.600' : 'blue.900'}
-                  color="blue.200"
-                  borderRadius="full"
-                  px={3}
-                  py={1}
+  const SearchAndTags = () => {
+    const [showAllTags, setShowAllTags] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [selectedTag, setSelectedTag] = useState('');
+    const displayedTags = showAllTags ? popularTags : popularTags.slice(0, 20);
+  
+    const handleTagSelect = (tag) => {
+      setSelectedTag(selectedTag === tag ? '' : tag);
+      setSearchQuery('');
+    };
+  
+    const handleSearchChange = (e) => {
+      const query = e.target.value;
+      setSearchQuery(query);
+      setSelectedTag('');
+    };
+  
+    return (
+      <Box mb={{ base: 4, md: 8 }}>
+        <InputGroup mb={{ base: 4, md: 6 }}>
+          <InputLeftElement pointerEvents="none">
+            <FiSearch color="gray.300" />
+          </InputLeftElement>
+          <Input
+            placeholder="Search posts by content or tags..."
+            bg="gray.900"
+            border="1px solid"
+            borderColor="gray.700"
+            color="white"
+            _placeholder={{ color: 'gray.400' }}
+            value={searchQuery}
+            onChange={handleSearchChange}
+            size={{ base: "md", md: "lg" }}
+          />
+        </InputGroup>
+  
+        {popularTags.length > 0 && (
+          <Box>
+            <Flex 
+              align="center" 
+              justifyContent="space-between" 
+              mb={3}
+            >
+              <Heading 
+                size={{ base: "xs", md: "sm" }} 
+                color="gray.300"
+              >
+                Popular Tags
+              </Heading>
+              {popularTags.length > 20 && (
+                <Text 
+                  color="blue.400" 
+                  fontSize="sm" 
                   cursor="pointer"
-                  _hover={{ bg: 'blue.800' }}
-                  onClick={() => {
-                    setSelectedTag(selectedTag === tag ? '' : tag);
-                    setSearchQuery('');
-                  }}
+                  onClick={() => setShowAllTags(!showAllTags)}
+                  _hover={{ textDecoration: 'underline' }}
                 >
-                  #{tag}
-                  <Text as="span" ml={2} fontSize="xs" color="gray.400">
-                    ({likes})
-                  </Text>
-                </Tag>
-              </WrapItem>
-            ))}
-          </Wrap>
-        </Box>
-      )}
-    </Box>
-  );
-
+                  {showAllTags ? 'Show Less' : `Show All (${popularTags.length})`}
+                </Text>
+              )}
+            </Flex>
+  
+            <Wrap 
+              spacing={{ base: 1, md: 2 }} 
+              justify="flex-start"
+            >
+              {displayedTags.map(({ tag, likes }) => (
+                <WrapItem key={tag}>
+                  <Tag
+                    size={{ base: "sm", md: "md" }}
+                    bg={selectedTag === tag ? 'blue.600' : 'blue.900'}
+                    color="blue.200"
+                    borderRadius="full"
+                    px={3}
+                    py={1}
+                    cursor="pointer"
+                    transition="all 0.2s"
+                    _hover={{ 
+                      bg: 'blue.800',
+                      transform: 'translateY(-2px)'
+                    }}
+                    onClick={() => handleTagSelect(tag)}
+                  >
+                    #{tag}
+                    <Text 
+                      as="span" 
+                      ml={2} 
+                      fontSize="xs" 
+                      color="gray.400"
+                    >
+                      ({likes})
+                    </Text>
+                  </Tag>
+                </WrapItem>
+              ))}
+            </Wrap>
+          </Box>
+        )}
+      </Box>
+    );
+  };
   const getFilteredPosts = () => {
     return posts.filter(post => {
       const matchesSearch = searchQuery.toLowerCase().trim() === '' ||

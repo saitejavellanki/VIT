@@ -8,20 +8,16 @@ import {
   Input,
   Textarea,
   VStack,
-  Image,
-  useToast,
   Tag,
   HStack,
-  IconButton,
   Select,
+  useToast,
   useColorModeValue,
   keyframes,
   Text,
 } from '@chakra-ui/react';
-import { CloseIcon, AddIcon } from '@chakra-ui/icons';
 import { collection, addDoc } from 'firebase/firestore';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { firestore, storage } from '../firebase/firebase';
+import { firestore, auth } from '../firebase/firebase';
 
 // Animation keyframes
 const float = keyframes`
@@ -43,8 +39,6 @@ const PostUpload = () => {
     text: '',
     tags: '',
   });
-  const [imageFile, setImageFile] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
@@ -63,64 +57,31 @@ const PostUpload = () => {
     }));
   };
 
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      if (file.size > 5000000) {
-        toast({
-          title: '🚫 File too large',
-          description: 'Image size should be less than 5MB',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-        });
-        return;
-      }
-      setImageFile(file);
-      setImagePreview(URL.createObjectURL(file));
-    }
-  };
-
-  const removeImage = () => {
-    setImageFile(null);
-    setImagePreview(null);
-    const fileInput = document.getElementById('imageUpload');
-    if (fileInput) fileInput.value = '';
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-
+   
     try {
-      let imageUrl = '';
-      
-      if (imageFile) {
-        const storageRef = ref(storage, `posts/${Date.now()}-${imageFile.name}`);
-        await uploadBytes(storageRef, imageFile);
-        imageUrl = await getDownloadURL(storageRef);
-      }
-
       const postData = {
         name: formData.name,
         gender: formData.gender,
         text: formData.text,
         tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-        imageUrl,
         createdAt: new Date(),
+        userId: auth.currentUser.uid,
         likes: [],
       };
-
+   
       const postsCollectionRef = collection(firestore, 'posts');
       await addDoc(postsCollectionRef, postData);
-
+   
+      // Reset form
       setFormData({
         name: '',
         gender: '',
         text: '',
         tags: '',
       });
-      removeImage();
       
       toast({
         title: '🎉 Post created',
@@ -131,19 +92,19 @@ const PostUpload = () => {
         position: 'top',
       });
     } catch (err) {
+      console.error('Upload error:', err);
       toast({
         title: '❌ Error',
-        description: 'Failed to upload post. Please try again.',
+        description: err.message || 'Failed to upload post',
         status: 'error',
         duration: 5000,
         isClosable: true,
         position: 'top',
       });
-      console.error('Upload error:', err);
     } finally {
       setLoading(false);
     }
-  };
+   };
 
   const renderTags = () => {
     const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
@@ -265,56 +226,6 @@ const PostUpload = () => {
             <HStack mt={4} spacing={3} wrap="wrap">
               {renderTags()}
             </HStack>
-          </FormControl>
-
-          <FormControl>
-            <FormLabel color={textColor}>🖼️ Image (Optional)</FormLabel>
-            <Input
-              type="file"
-              id="imageUpload"
-              accept="image/*"
-              onChange={handleImageChange}
-              display="none"
-            />
-            <Button
-              as="label"
-              htmlFor="imageUpload"
-              colorScheme="blue"
-              variant="outline"
-              cursor="pointer"
-              leftIcon={<AddIcon />}
-              borderRadius="xl"
-              _hover={{
-                transform: 'scale(1.05)',
-                transition: 'transform 0.2s',
-              }}
-            >
-              Choose Image
-            </Button>
-            
-            {imagePreview && (
-              <Box position="relative" mt={4}>
-                <IconButton
-                  icon={<CloseIcon />}
-                  size="sm"
-                  position="absolute"
-                  top={2}
-                  right={2}
-                  onClick={removeImage}
-                  colorScheme="red"
-                  aria-label="Remove image"
-                  borderRadius="full"
-                />
-                <Image
-                  src={imagePreview}
-                  alt="Preview"
-                  maxH="200px"
-                  objectFit="contain"
-                  borderRadius="xl"
-                  boxShadow="lg"
-                />
-              </Box>
-            )}
           </FormControl>
 
           <Button
