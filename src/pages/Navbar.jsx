@@ -173,7 +173,7 @@ const Navbar = () => {
                 size="sm"
                 name={user.displayName || "User"}
                 src={user.photoURL || undefined}
-                onClick={() => navigate("/profile")}
+                // onClick={() => navigate("/profile")}
                 cursor="pointer"
               />
             ) : null}
