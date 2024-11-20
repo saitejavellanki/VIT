@@ -17,6 +17,7 @@ import {
   Text,
 } from '@chakra-ui/react';
 import { collection, addDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { firestore, auth } from '../firebase/firebase';
 
 // Animation keyframes
@@ -38,6 +39,7 @@ const PostUpload = () => {
     gender: '',
     text: '',
     tags: '',
+    image: null, // New state for the image
   });
   const [loading, setLoading] = useState(false);
   const toast = useToast();
@@ -50,39 +52,50 @@ const PostUpload = () => {
   const borderColor = useColorModeValue('blue.400', 'blue.500');
 
   const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    const { name, value, files } = e.target;
+    if (name === 'image') {
+      setFormData((prev) => ({ ...prev, image: files[0] })); // Handle image file
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-   
+
     try {
+      let imageUrl = '';
+      if (formData.image) {
+        const storage = getStorage();
+        const storageRef = ref(storage, `post-images/${formData.image.name}`);
+        await uploadBytes(storageRef, formData.image);
+        imageUrl = await getDownloadURL(storageRef); // Get the uploaded image URL
+      }
+
       const postData = {
         name: formData.name,
         gender: formData.gender,
         text: formData.text,
-        tags: formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+        tags: formData.tags.split(',').map((tag) => tag.trim()).filter((tag) => tag),
+        imageUrl, // Include the image URL in the post data
         createdAt: new Date(),
         userId: auth.currentUser.uid,
         likes: [],
       };
-   
+
       const postsCollectionRef = collection(firestore, 'posts');
       await addDoc(postsCollectionRef, postData);
-   
+
       // Reset form
       setFormData({
         name: '',
         gender: '',
         text: '',
         tags: '',
+        image: null,
       });
-      
+
       toast({
         title: '🎉 Post created',
         description: 'Your post has been successfully uploaded',
@@ -104,14 +117,14 @@ const PostUpload = () => {
     } finally {
       setLoading(false);
     }
-   };
+  };
 
   const renderTags = () => {
-    const tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+    const tags = formData.tags.split(',').map((tag) => tag.trim()).filter((tag) => tag);
     return tags.map((tag, index) => (
-      <Tag 
-        key={index} 
-        colorScheme="blue" 
+      <Tag
+        key={index}
+        colorScheme="blue"
         size="md"
         borderRadius="full"
         animation={`${float} 3s ease-in-out infinite`}
@@ -119,7 +132,7 @@ const PostUpload = () => {
           '&:hover': {
             transform: 'scale(1.1)',
             transition: 'transform 0.2s',
-          }
+          },
         }}
       >
         #{tag}
@@ -228,6 +241,22 @@ const PostUpload = () => {
             </HStack>
           </FormControl>
 
+          <FormControl>
+            <FormLabel color={textColor}>📷 Upload Image</FormLabel>
+            <Input
+              type="file"
+              name="image"
+              accept="image/*"
+              onChange={handleInputChange}
+              bg={inputBg}
+              color={textColor}
+              borderColor={borderColor}
+              _hover={{ borderColor: 'blue.300' }}
+              _focus={{ borderColor: 'blue.300', boxShadow: 'none' }}
+              borderRadius="xl"
+            />
+          </FormControl>
+
           <Button
             type="submit"
             colorScheme="blue"
@@ -245,8 +274,9 @@ const PostUpload = () => {
               bgGradient: 'linear(to-r, blue.600, purple.700)',
             }}
             transition="all 0.2s"
+            textTransform="uppercase"
           >
-            {loading ? '✨ Creating Magic...' : '🚀 Create Post'}
+            ✨ Create Post
           </Button>
         </VStack>
       </Box>
