@@ -8,10 +8,11 @@ import { MessageCircle } from 'lucide-react';
 // Pages
 import HomePage from "./pages/HomePage/HomePage";
 import AuthPage from "./pages/AuthPage/AuthPage";
-import ProfilePage from "./pages/ProfilePage/ProfilePage";
+import ProfilePage from "./pages/profileJust";
 import PostUpload from "./pages/post_upload";
 import FeedPage from "./pages/postfeeds";
 import Navbar from "./pages/Navbar";
+import UserProfile from './pages/profileJust';
 
 // Loading Screen Component
 const LoadingScreen = () => {
@@ -119,6 +120,7 @@ function App() {
         <Route path='/auth' element={!authUser ? <AuthPage /> : <Navigate to='/' />} />
         <Route path='/upload' element={<PostUpload />} />
         <Route path='/' element={<FeedPage />} />
+		<Route path="/profile/:userId" element={<UserProfile/>} />
       </Routes>
     </Box>
   );

@@ -212,7 +212,7 @@ export const PostCard = ({ post, onLike }) => {
           <Box flex="1">
             <Flex align="center" gap={2} mb={1}>
               <Text fontWeight="bold" fontSize="15px">
-                {post.name}
+                {post.username || post.name}
               </Text>
               {post.gender && <GenderSymbol gender={post.gender} />}
               <Text fontSize="15px" color="gray.500">

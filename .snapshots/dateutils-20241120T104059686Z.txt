@@ -1,18 +1,4 @@
-// dateUtils.js
-
-export const formatDate = (date) => {
-    if (!date) return '';
-    
-    try {
-      const dateObj = new Date(date);
-      return dateObj.toLocaleDateString();
-    } catch (error) {
-      console.error("Error formatting date:", error);
-      return '';
-    }
-  };
-  
-  export const formatTimestamp = (timestamp) => {
+export const formatTimestamp = (timestamp) => {
     if (!timestamp) return '';
     
     let date;
@@ -26,10 +12,10 @@ export const formatDate = (date) => {
       } else {
         date = new Date(timestamp);
       }
-      
+  
       const now = new Date();
       const diffInSeconds = Math.floor((now - date) / 1000);
-      
+  
       if (diffInSeconds < 60) return 'just now';
       if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)}m`;
       if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)}h`;

@@ -18,13 +18,14 @@ import {
   useDisclosure,
   VStack,
   HStack,
-  Container
+  Container,
+  Badge
 } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "../firebase/firebase";
 import { signOut } from "firebase/auth";
-import { MessageCircle, Menu } from 'lucide-react';
+import { MessageCircle, Menu, PlusCircle } from 'lucide-react';
 
 const Navbar = () => {
   const navigate = useNavigate();
@@ -38,8 +39,8 @@ const Navbar = () => {
       navigate("/upload");
     } else {
       toast({
-        title: "Chat Options Available",
-        description: "Login to chat or continue anonymously",
+        title: "New Thread Options",
+        description: "Login to create a thread or continue anonymously",
         status: "info",
         duration: 5000,
         isClosable: true,
@@ -52,20 +53,31 @@ const Navbar = () => {
             borderRadius="md"
           >
             <VStack align="stretch" spacing={3}>
-              <Text fontWeight="bold">Chat Options Available</Text>
-              <Text>Login to chat or continue anonymously</Text>
+              <Text fontWeight="bold">Create New Thread</Text>
+              <Text>Login to start a thread or continue anonymously</Text>
               <HStack spacing={3}>
-                <Button size="sm" colorScheme="whiteAlpha" onClick={() => {
-                  navigate("/auth");
-                  onClose();
-                }}>
-                  Login
+                <Button 
+                  size="sm" 
+                  colorScheme="whiteAlpha" 
+                  onClick={() => {
+                    navigate("/auth");
+                    onClose();
+                  }}
+                  leftIcon={<PlusCircle size={16} />}
+                >
+                  Login & Create
                 </Button>
-                <Button size="sm" variant="outline" colorScheme="whiteAlpha" onClick={() => {
-                  navigate("/anonymous-chat");
-                  onClose();
-                }}>
-                  Chat Anonymously
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  colorScheme="whiteAlpha" 
+                  onClick={() => {
+                    navigate("/anonymous-chat");
+                    onClose();
+                  }}
+                  leftIcon={<MessageCircle size={16} />}
+                >
+                  Anonymous Thread
                 </Button>
               </HStack>
             </VStack>
@@ -85,15 +97,17 @@ const Navbar = () => {
 
   const ChatButton = () => (
     <Tooltip 
-      label={user ? "Start chatting" : "Login or chat anonymously"}
+      label={user ? "Create new thread" : "Login or create anonymous thread"}
       hasArrow
+      placement="bottom"
     >
       <Button
         variant="ghost"
         onClick={handleChatNavigation}
-        leftIcon={<MessageCircle size={20} />}
+        leftIcon={<PlusCircle size={20} />}
+        rightIcon={<Badge colorScheme="blue" variant="subtle"></Badge>}
       >
-        Chat
+        New Thread
       </Button>
     </Tooltip>
   );
@@ -169,21 +183,31 @@ const Navbar = () => {
           <HStack spacing={4} display={{ base: 'none', md: 'flex' }}>
             <ChatButton />
             {user ? (
-              <Avatar
-                size="sm"
-                name={user.displayName || "User"}
-                src={user.photoURL || undefined}
-                // onClick={() => navigate("/profile")}
-                cursor="pointer"
-              />
-            ) : null}
-            <Button
-              onClick={handleAuth}
-              colorScheme={user ? "red" : "blue"}
-              variant="solid"
-            >
-              {user ? "Logout" : "Login"}
-            </Button>
+              <HStack spacing={3}>
+                <Avatar
+                  size="sm"
+                  name={user.displayName || "User"}
+                  src={user.photoURL || undefined}
+                  onClick={() => navigate("/profile")}
+                  cursor="pointer"
+                />
+                <Button
+                  onClick={handleAuth}
+                  colorScheme="red"
+                  variant="solid"
+                >
+                  Logout
+                </Button>
+              </HStack>
+            ) : (
+              <Button
+                onClick={handleAuth}
+                colorScheme="blue"
+                variant="solid"
+              >
+                Login
+              </Button>
+            )}
           </HStack>
 
           {/* Mobile Navigation */}
